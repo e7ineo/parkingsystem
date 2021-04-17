@@ -16,7 +16,12 @@ public class FareCalculatorService {
         //TODO: Some tests are failing here. Need to check if this logic is correct
         double duration = (outHour - inHour)/1000.00/60.00/60.00;
         System.out.println(outHour +" "+  inHour +" "+ duration);
-
+        
+        if (duration < 0.5) {
+        	ticket.setPrice(0);
+        }
+        
+        else {
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {
                 ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);
@@ -27,6 +32,7 @@ public class FareCalculatorService {
                 break;
             }
             default: throw new IllegalArgumentException("Unkown Parking Type");
+            }
         }
     }
 }
