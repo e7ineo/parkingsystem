@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 
@@ -81,29 +81,53 @@ public class ParkingDataBaseIT {
     }
 
     @Test
-    public void testParkingLotExitGetAnOutTime() throws InterruptedException{
+    public void testParkingLotExitGetAnOutTime() throws InterruptedException {
 
     	parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
         Thread.sleep(500);
     	parkingService.processExitingVehicle();
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+    	Ticket ticket = ticketDAO.getTicket("ABCDEF");
         assertNotNull(ticket.getOutTime());  
         
         //TODO: check that the fare generated and out time are populated correctly in the database
     }
     
     @Test
-    public void testParkingLotExitGetFare() throws InterruptedException{
+    public void testParkingLotExitGetFare() throws InterruptedException {
 
     	parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         parkingService.processIncomingVehicle();
         Thread.sleep(500);
     	parkingService.processExitingVehicle();
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+    	Ticket ticket = ticketDAO.getTicket("ABCDEF");
         assertNotNull(ticket.getPrice());  
         
         //TODO: check that the fare generated and out time are populated correctly in the database
+    }
+    
+    @Test
+    public void setUserExistRecurentUserOK() throws InterruptedException {
+    
+    	parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();
+        Thread.sleep(500);
+    	parkingService.processExitingVehicle();
+    	boolean exist = ticketDAO.setUserExist("ABCDEF");
+		assertTrue(exist);
+    	
+    }
+    
+    @Test
+    public void setUserExistRecurentUserNotOK() throws InterruptedException {
+    
+    	parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+        parkingService.processIncomingVehicle();       
+        Thread.sleep(500);
+    	parkingService.processExitingVehicle();	
+    	boolean exist = ticketDAO.setUserExist("GHIJKL");
+		assertFalse(exist);
+    	
     }
 
 }

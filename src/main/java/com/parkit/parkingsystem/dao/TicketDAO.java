@@ -68,6 +68,35 @@ public class TicketDAO {
             return ticket;
         }
     }
+    
+    public Ticket getTicketOut(String vehicleRegNumber) {
+        Connection con = null;
+        Ticket ticket = null;
+        try {
+            con = dataBaseConfig.getConnection();
+            PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET_OUT);
+            //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+            ps.setString(1,vehicleRegNumber);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                ticket = new Ticket();
+                ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)),false);
+                ticket.setParkingSpot(parkingSpot);
+                ticket.setId(rs.getInt(2));
+                ticket.setVehicleRegNumber(vehicleRegNumber);
+                ticket.setPrice(rs.getBigDecimal(3));
+                ticket.setInTime(rs.getTimestamp(4));
+                ticket.setOutTime(rs.getTimestamp(5));
+            }
+            dataBaseConfig.closeResultSet(rs);
+            dataBaseConfig.closePreparedStatement(ps);
+        }catch (Exception ex){
+            logger.error("Error fetching next available slot",ex);
+        }finally {
+            dataBaseConfig.closeConnection(con);
+            return ticket;
+        }
+    }
 
     public boolean updateTicket(Ticket ticket) {
         Connection con = null;
@@ -86,4 +115,29 @@ public class TicketDAO {
         }
         return false;
     }
+       
+    public boolean setUserExist(String vehicleRegNumber) {
+ 
+    	boolean recurentUser = false;
+    	
+    	Connection con = null;
+    	try {
+    		con = dataBaseConfig.getConnection();
+    		String query = "select (case when vehicle_reg_number = '" + vehicleRegNumber + "' and out_time is not null then true "
+    				+ "else false end) as recurent_user from ticket"; 
+    		PreparedStatement ps = con.prepareStatement(query);  		
+    		ResultSet rs = ps.executeQuery();
+    		while(rs.next()) {
+    			recurentUser = rs.getBoolean(1);
+    			if (recurentUser == true) {
+    				System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+    				break;
+    			}
+    		}    					
+    	}catch(Exception e) {
+    		
+    	} 	   	
+    	return recurentUser;
+    }
+
 }
